@@ -4,6 +4,9 @@
 # Config file
 *.config
 
+# target directory
+target/
+
 # Log file
 *.log
 
