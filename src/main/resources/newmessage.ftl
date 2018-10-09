@@ -8,7 +8,7 @@
 <body>
 <header>
     <h1>Сообщения стены ВК</h1>
-    <nav><a href="/wall">Сообщения</a></nav>
+    <nav><a href="/wall/10">Сообщения</a></nav>
 </header>
 <div class="container">
   <form action="/newmessage" method="POST">

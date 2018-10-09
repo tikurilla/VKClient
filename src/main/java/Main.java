@@ -16,6 +16,10 @@ import java.util.*;
 
 public class Main {
 
+    static final int MIN_POSTS_AMOUNT = 10;
+
+    static final int MAX_POSTS_AMOUNT = 40;
+
     public static void main(String[] args) {
         VkApiClient vk = new VkApiClient(new HttpTransportClient());
         VKAPIController vkApiController = new VKAPIController(VKScope.wall, vk);
@@ -31,22 +35,42 @@ public class Main {
                                                                                  request.queryParams("code")).execute();
             vkApiController.setToken(authResponse.getAccessToken());
             vkApiController.setUserID(authResponse.getUserId());
-            response.redirect("/wall?token=" + vkApiController.getToken() + "&user=" + authResponse.getUserId());
+            // redirecting to the wall page with minimal post amount
+            response.redirect("/wall/" + Integer.toString(MIN_POSTS_AMOUNT)
+                                       + "?token=" + vkApiController.getToken()
+                                       + "&user=" + authResponse.getUserId());
             return null;
         }));
 
-        get("/wall", (request, response) -> {
+        get("/wall/:amount", (request, response) -> {
+            int amount = 0;
+            try {
+                amount = Integer.parseInt(request.params(":amount"));
+            }
+            catch (NumberFormatException ex) {
+                ex.printStackTrace();
+                amount = MIN_POSTS_AMOUNT;
+            }
+
+            // truncate amount with minimal and maximum values
+            if (amount < MIN_POSTS_AMOUNT) {
+                amount = MIN_POSTS_AMOUNT;
+            }
+            else if (amount > MAX_POSTS_AMOUNT) {
+                amount = MAX_POSTS_AMOUNT;
+            }
+            // create actor only first time after login
             if (vkApiController.getActor()==null) {
                 vkApiController.createActor(Integer.parseInt(request.queryParams("user")));
             }
             GetResponse getResponse = vk.wall().get(vkApiController.getActor())
-                    .count(20)    // dynamic
+                    .count(amount)    // posts amount
                     .execute();
             List<WallPostFull> wallList = getResponse.getItems();
             List<Post> postList = new ArrayList<>();
             List<String> ownerIds = new ArrayList<>();
             for(WallPostFull post: wallList) {
-                ownerIds.add(Integer.toString(post.getFromId()));
+                ownerIds.add(Integer.toString(post.getFromId())); // getting wall posts IDs
             }
             List<UserXtrCounters> usersList = vk.users().get(vkApiController.getActor()).userIds(ownerIds).execute();
             Map<Integer, String> usersMap = new HashMap<>();

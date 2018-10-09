@@ -25,7 +25,14 @@ dd {
   border-left: none;
 }
 
-a {
+.amount {
+  display: inline-block;
+  padding: 5px;
+  background: #dfe2e5;
+  color: #2a91d8;
+}
+
+.menu {
     color: #e4e5e8;
 }
 
