@@ -7,19 +7,19 @@
 </head>
 <body>
 <header>
-    <h1>Сообщения стены ВК</h1>
-    <nav><a href="/wall/10">Сообщения</a></nav>
+    <h1>VK wall messages</h1>
+    <nav><a href="/wall/10">Wall messages</a></nav>
 </header>
 <div class="container">
   <form action="/newmessage" method="POST">
   ${errors!""}
     <div class="row">
       <div class="col-100">
-        <textarea id="subject" name="subject" input placeholder="Сообщение.." style="height:200px">${subject}</textarea>
+        <textarea id="subject" name="subject" input placeholder="New message here.." style="height:200px">${subject}</textarea>
       </div>
     </div>
     <div class="row">
-      <input type="submit" value="Отправить">
+      <input type="submit" value="Send">
     </div>
   </form>
 </div>

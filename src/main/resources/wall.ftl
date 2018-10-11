@@ -5,8 +5,8 @@
   <title>Welcome!</title>
 </head>
 <header>
-    <h1>Сообщения стены ВК</h1>
-    <nav><a class="menu" href="/newmessage">Новое сообщение</a></nav>
+    <h1>VK wall messages</h1>
+    <nav><a class="menu" href="/newmessage">New message</a></nav>
 </header>
 <body>
 <ul class="zebra">
