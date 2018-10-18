@@ -8,10 +8,10 @@
 <body>
 <header>
     <h1>VK wall messages</h1>
-    <nav><a href="/wall/10">Wall messages</a></nav>
+    <nav><a href="/wall/10?token=${authToken}&user=${authUser}">Wall messages</a></nav>
 </header>
 <div class="container">
-  <form action="/newmessage" method="POST">
+  <form action="/newmessage?token=${authToken}&user=${authUser}" method="POST">
   ${errors!""}
     <div class="row">
       <div class="col-100">

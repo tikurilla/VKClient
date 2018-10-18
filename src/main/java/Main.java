@@ -1,5 +1,6 @@
 import static spark.Spark.*;
 import com.vk.api.sdk.client.VkApiClient;
+import com.vk.api.sdk.client.actors.UserActor;
 import com.vk.api.sdk.httpclient.HttpTransportClient;
 import com.vk.api.sdk.objects.UserAuthResponse;
 import com.vk.api.sdk.objects.users.UserXtrCounters;
@@ -37,8 +38,8 @@ public class Main {
             vkApiController.setUserID(authResponse.getUserId());
             // redirecting to the wall page with minimal post amount
             response.redirect("/wall/" + Integer.toString(MIN_POSTS_AMOUNT)
-                                       + "?token=" + vkApiController.getToken()
-                                       + "&user=" + authResponse.getUserId());
+                                       + "?token=" + authResponse.getAccessToken() //vkApiController.getToken()
+                                       + "&user=" + authResponse.getUserId()); //authResponse.getUserId());
             return null;
         }));
 
@@ -59,11 +60,7 @@ public class Main {
             else if (amount > MAX_POSTS_AMOUNT) {
                 amount = MAX_POSTS_AMOUNT;
             }
-            // create actor only first time after login
-            if (vkApiController.getActor()==null) {
-                vkApiController.createActor(Integer.parseInt(request.queryParams("user")));
-            }
-            GetResponse getResponse = vk.wall().get(vkApiController.getActor())
+            GetResponse getResponse = vk.wall().get(new UserActor(Integer.parseInt(request.queryParams("user")), request.queryParams("token")))
                     .count(amount)    // posts amount
                     .execute();
             List<WallPostFull> wallList = getResponse.getItems();
@@ -72,7 +69,7 @@ public class Main {
             for(WallPostFull post: wallList) {
                 ownerIds.add(Integer.toString(post.getFromId())); // getting wall posts IDs
             }
-            List<UserXtrCounters> usersList = vk.users().get(vkApiController.getActor()).userIds(ownerIds).execute();
+            List<UserXtrCounters> usersList = vk.users().get(new UserActor(Integer.parseInt(request.queryParams("user")), request.queryParams("token"))).userIds(ownerIds).execute();
             Map<Integer, String> usersMap = new HashMap<>();
             for(UserXtrCounters user: usersList){
                 usersMap.put(user.getId(), user.getFirstName() + " " + user.getLastName());
@@ -87,6 +84,9 @@ public class Main {
             }
             Map<String, Object> attributes = new HashMap<>();
             attributes.put("posts", postList);
+            attributes.put("authUser", request.queryParams("user"));
+            attributes.put("authToken", request.queryParams("token"));
+
             return new ModelAndView(attributes, "wall.ftl");
         }, new FreeMarkerTemplateEngine());
 
@@ -94,6 +94,8 @@ public class Main {
             HashMap<String, String> attributes = new HashMap<>();
             attributes.put("errors", "Введите текст сообщения.");
             attributes.put("subject", "");
+            attributes.put("authUser", request.queryParams("user"));
+            attributes.put("authToken", request.queryParams("token"));
             return new ModelAndView(attributes, "newmessage.ftl");
         }, new FreeMarkerTemplateEngine());
 
@@ -108,10 +110,9 @@ public class Main {
                 System.out.println("Post: " + message);
                 PostResponse postResponse = new PostResponse();
                 try {
-                    System.out.println("Actor: " + vkApiController.getActor().toString());
                     postResponse = vk.wall().
-                                post(vkApiController.getActor()).
-                                ownerId(vkApiController.getUserID()).
+                                post(new UserActor(Integer.parseInt(request.queryParams("user")), request.queryParams("token"))).
+                                ownerId(Integer.parseInt(request.queryParams("user"))).
                                 message(message).
                                 execute();
 
@@ -120,11 +121,17 @@ public class Main {
                     ex.printStackTrace();
                     attributes.put("errors", "Не хватает прав или нет разрешения на публикацию сообщений на вашей стене.");
                     attributes.put("subject", message);
+                    attributes.put("authUser", request.queryParams("user"));
+                    attributes.put("authToken", request.queryParams("token"));
                     return new ModelAndView(attributes, "newmessage.ftl");
                 }
                 System.out.println("Post ID: " + postResponse.getPostId());
-                response.redirect("/wall");
+                response.redirect("/wall" + Integer.toString(MIN_POSTS_AMOUNT)
+                        + "?token=" + request.queryParams("token")
+                        + "&user=" + request.queryParams("user"));
             }
+            attributes.put("authUser", request.queryParams("user"));
+            attributes.put("authToken", request.queryParams("token"));
             return new ModelAndView(attributes, "newmessage.ftl");
         }, new FreeMarkerTemplateEngine());
     }

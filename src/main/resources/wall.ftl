@@ -6,15 +6,15 @@
 </head>
 <header>
     <h1>VK wall messages</h1>
-    <nav><a class="menu" href="/newmessage">New message</a></nav>
+    <nav><a class="menu" href="/newmessage?token=${authToken}&user=${authUser}">New message</a></nav>
 </header>
 <body>
 <ul class="zebra">
 <div align="center">
     <nav class="amount">
-        <a href="/wall/10">10</a>
-        <a href="/wall/20">20</a>
-        <a href="/wall/40">40</a>
+        <a href="/wall/10?token=${authToken}&user=${authUser}">10</a>
+        <a href="/wall/20?token=${authToken}&user=${authUser}">20</a>
+        <a href="/wall/40?token=${authToken}&user=${authUser}">40</a>
     </nav>
 </div>
 </ul>
